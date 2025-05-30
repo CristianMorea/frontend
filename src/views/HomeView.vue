@@ -1,18 +1,115 @@
 <template>
-  <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div class="home-container">
+    <div class="content-wrapper">
+      <TextInput 
+        @text-change="handleTextChange"
+        @file-upload="handleFileUpload"
+        :loading="loading"
+      />
+      
+      <ActionSelector 
+        @action-change="handleActionChange"
+        @confirm-action="processContent"
+        :selected-action="selectedAction"
+        :disabled="!hasContent || loading"
+      />
+      
+      <ResultDisplay 
+        :result="result"
+        :loading="loading"
+        :error="error"
+        :action="selectedAction"
+        @clear="clearResult"
+      />
+    </div>
   </div>
 </template>
 
 <script>
-// @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
+import TextInput from '../components/TextInput.vue'
+import ActionSelector from '../components/ActionSelector.vue'
+import ResultDisplay from '../components/ResultDisplay.vue'
+import { procesarContenido } from '../Service/resumenService'
 
 export default {
   name: 'HomeView',
   components: {
-    HelloWorld
+    TextInput,
+    ActionSelector,
+    ResultDisplay
+  },
+  data() {
+    return {
+      inputText: '',
+      uploadedFile: null,
+      selectedAction: 'resumir',
+      result: '',
+      loading: false,
+      error: null
+    }
+  },
+  computed: {
+    hasContent() {
+      return this.inputText.trim() || this.uploadedFile
+    }
+  },
+  methods: {
+    handleTextChange(text) {
+      this.inputText = text
+      this.clearResult()
+    },
+    
+    handleFileUpload(file) {
+      this.uploadedFile = file
+      this.clearResult()
+    },
+    
+    handleActionChange(action) {
+      this.selectedAction = action
+      this.clearResult()
+    },
+    
+    async processContent() {
+      if (!this.hasContent) {
+        this.error = 'Por favor, ingresa texto o sube un archivo'
+        return
+      }
+
+      this.loading = true
+      this.error = null
+
+      try {
+        const response = await procesarContenido({
+          text: this.inputText,
+          file: this.uploadedFile,
+          action: this.selectedAction
+        })
+
+        this.result = response.resultado || 'No se recibió respuesta válida del servidor.'
+
+      } catch (err) {
+        this.error = 'Error al procesar el contenido. Inténtalo de nuevo.'
+        console.error(err)
+      } finally {
+        this.loading = false
+      }
+    },
+    
+    clearResult() {
+      this.result = ''
+      this.error = null
+    }
   }
 }
 </script>
+
+<style scoped>
+.home-container {
+  padding: 2rem;
+}
+
+.content-wrapper {
+  max-width: 800px;
+  margin: auto;
+}
+</style>
