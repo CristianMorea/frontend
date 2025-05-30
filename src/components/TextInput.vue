@@ -56,39 +56,64 @@ export default {
   data() {
     return {
       localText: '',
-      uploadedFileName: ''
+      uploadedFileName: '',
+      internalFile: null
+    }
+  },
+  watch: {
+    localText(newText) {
+      if (newText.trim()) {
+        // Crear archivo txt a partir del texto
+        const blob = new Blob([newText], { type: 'text/plain' })
+        const file = new File([blob], 'texto.txt', { type: 'text/plain' })
+        this.internalFile = file
+        this.uploadedFileName = file.name
+        this.$emit('file-upload', file)
+      } else if (!this.uploadedFileName) {
+        // Si no hay texto ni archivo, emitimos null
+        this.internalFile = null
+        this.$emit('file-upload', null)
+      }
     }
   },
   methods: {
     onTextChange() {
+      // Emitimos el texto para otras partes que lo usen
       this.$emit('text-change', this.localText)
     },
     
     onFileUpload(event) {
       const file = event.target.files[0]
       if (file) {
-        // Validar tipo de archivo
-        const validTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+        const validTypes = [
+          'application/pdf',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        ]
         if (!validTypes.includes(file.type)) {
           alert('Formato de archivo no válido. Solo se permiten PDF y DOCX.')
+          event.target.value = null // limpiar input
           return
         }
-        
-        // Validar tamaño (máximo 10MB)
         if (file.size > 10 * 1024 * 1024) {
           alert('El archivo es demasiado grande. Máximo 10MB.')
+          event.target.value = null // limpiar input
           return
         }
-        
+        // Al subir archivo real, limpiamos texto y guardamos archivo
+        this.localText = ''
+        this.internalFile = file
         this.uploadedFileName = file.name
         this.$emit('file-upload', file)
-        this.localText = '' // Limpiar texto si se sube archivo
       }
     },
     
     removeFile() {
       this.uploadedFileName = ''
+      this.internalFile = null
+      this.localText = ''
       this.$emit('file-upload', null)
+      this.$emit('text-change', '')  // Limpiar también el texto
+      this.$refs.fileInput.value = null  // limpiar input file
     }
   }
 }

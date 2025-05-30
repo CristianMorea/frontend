@@ -29,6 +29,7 @@
 import TextInput from './components/TextInput.vue';
 import ActionSelector from './components/ActionSelector.vue';
 import ResultDisplay from './components/ResultDisplay.vue';
+import { obtenerResumen } from './Service/resumenService'  // Ajusta ruta según ubicación real
 
 export default {
   name: 'AppMain',
@@ -54,49 +55,61 @@ export default {
   },
   methods: {
     handleTextChange(text) {
+      console.log('[handleTextChange] Nuevo texto:', text);
       this.inputText = text
       this.clearResult()
     },
     
     handleFileUpload(file) {
+      console.log('[handleFileUpload] Archivo cargado:', file);
       this.uploadedFile = file
       this.clearResult()
     },
     
     handleActionChange(action) {
+      console.log('[handleActionChange] Acción seleccionada:', action);
       this.selectedAction = action
       this.clearResult()
     },
     
     async processContent() {
+      console.log('[processContent] Inicio de procesamiento');
       if (!this.hasContent) {
         this.error = 'Por favor, ingresa texto o sube un archivo'
+        console.warn('[processContent] No hay contenido para procesar');
         return
       }
 
       this.loading = true
       this.error = null
-      
+
       try {
-        await new Promise(resolve => setTimeout(resolve, 2000))
-        
-        const content = this.uploadedFile
-          ? `Contenido del archivo: ${this.uploadedFile.name}`
-          : this.inputText
-        
         if (this.selectedAction === 'resumir') {
-          this.result = `Resumen: ${content.substring(0, 100)}...`
+          if (this.uploadedFile) {
+            console.log('[processContent] Enviando archivo al backend para resumen...');
+            const response = await obtenerResumen({ archivo: this.uploadedFile })
+            console.log('[processContent] Respuesta recibida:', response);
+            // Corrección aquí: acceder a response.resumen, no response.summary
+            this.result = response.resumen || 'No se recibió resumen'
+          } else {
+            console.log('[processContent] Resumiendo texto ingresado localmente');
+            this.result = `Resumen: ${this.inputText.substring(0, 100)}...`
+          }
         } else {
-          this.result = `Traducción: [Translated content of: ${content.substring(0, 50)}...]`
+          console.log('[processContent] Acción traducción seleccionada');
+          this.result = `Traducción: [Translated content of: ${this.inputText.substring(0, 50)}...]`
         }
       } catch (err) {
-        this.error = 'Error al procesar el contenido. Inténtalo de nuevo.'
+        console.error('[processContent] Error al procesar contenido:', err);
+        this.error = err.message || 'Error al procesar el contenido. Inténtalo de nuevo.'
       } finally {
         this.loading = false
+        console.log('[processContent] Fin de procesamiento');
       }
     },
     
     clearResult() {
+      console.log('[clearResult] Limpiando resultados y errores');
       this.result = ''
       this.error = null
     }
