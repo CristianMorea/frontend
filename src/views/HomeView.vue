@@ -58,17 +58,14 @@ export default {
       this.inputText = text
       this.clearResult()
     },
-    
     handleFileUpload(file) {
       this.uploadedFile = file
       this.clearResult()
     },
-    
     handleActionChange(action) {
       this.selectedAction = action
       this.clearResult()
     },
-    
     async processContent() {
       if (!this.hasContent) {
         this.error = 'Por favor, ingresa texto o sube un archivo'
@@ -94,7 +91,6 @@ export default {
         this.loading = false
       }
     },
-    
     clearResult() {
       this.result = ''
       this.error = null
@@ -106,10 +102,16 @@ export default {
 <style scoped>
 .home-container {
   padding: 2rem;
+  display: flex;
+  justify-content: center;
 }
 
 .content-wrapper {
-  max-width: 800px;
-  margin: auto;
+  width: 100%;
+  max-width: 1200px;
+  padding: 2rem;
+  box-sizing: border-box;
+  background-color: #f9f9f9;
+  border-radius: 10px;
 }
 </style>

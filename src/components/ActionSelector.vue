@@ -14,7 +14,9 @@
         <span class="action-text">Resumir</span>
         <span v-if="selectedAction === 'resumir'" class="active-indicator">⦿</span>
       </button>
-      
+
+      <!-- Botón de "Traducir" oculto -->
+      <!--
       <button
         @click="selectAction('traducir')"
         :class="['action-btn', { 'active': selectedAction === 'traducir', 'disabled': disabled }]"
@@ -24,6 +26,7 @@
         <span class="action-text">Traducir</span>
         <span v-if="selectedAction === 'traducir'" class="active-indicator">⦿</span>
       </button>
+      -->
     </div>
 
     <button 
@@ -39,6 +42,7 @@
     </div>
   </div>
 </template>
+
 
 <script>
 export default {
