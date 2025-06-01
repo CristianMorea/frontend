@@ -4,7 +4,7 @@
 
 # Visión General
 - aplicacion en funcionamiento 
-![alt text](/src/assets/AplicaiconFuncional.pngg)
+![alt text](/src/assets/AplicaiconFuncional.png)
 nterfaz Vue.js para consumir la API de procesamiento de texto, con capacidad para:
 
 - Resumir documentos (PDF/TXT)
